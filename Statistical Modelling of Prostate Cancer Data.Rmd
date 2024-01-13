@@ -1,0 +1,200 @@
+
+```{r}
+PCdata = read.csv("prostate_cancer.csv")
+print(PCdata)
+```
+```{r}
+summary(PCdata)
+```
+
+
+```{r}
+cor(PCdata)
+```
+
+
+```{r}
+plot(PCdata$subject)
+```
+```{r}
+# Scaling psa
+LogPsa = log(PCdata$psa)
+```
+
+```{r}
+boxplot(PCdata$psa)
+```
+```{r}
+plot(PCdata$psa,PCdata$age)
+```
+```{r}
+#Column Names
+ColNames = colnames(PCdata)
+ColNames
+```
+```{r}
+#Relation between LogPsa and PCdata and PCdata$subject
+plot(PCdata$subject, LogPsa)
+Fit1 = lm(LogPsa~PCdata$subject, data = PCdata)
+abline(Fit1)
+```
+```{r}
+summary(Fit1)
+```
+```{r}
+#Relation between LogPsa and PCdata and PCdata$cancervol
+plot(PCdata$cancervol, LogPsa)
+Fit2 = lm(LogPsa~PCdata$cancervol, data = PCdata)
+abline(Fit2)
+```
+```{r}
+summary(Fit2)
+```
+```{r}
+#Relation between LogPsa and PCdata and PCdata$weight
+plot(PCdata$weight, LogPsa)
+Fit3 = lm(LogPsa~PCdata$weight, data = PCdata)
+abline(Fit3)
+```
+```{r}
+summary(Fit3)
+```
+```{r}
+#Relation between LogPsa and PCdata and PCdata$age
+plot(PCdata$age, LogPsa)
+Fit4 = lm(LogPsa~PCdata$age, data = PCdata)
+abline(Fit4)
+```
+```{r}
+summary(Fit4)
+```
+```{r}
+#Relation between LogPsa and PCdata and PCdata$benpros
+plot(PCdata$benpros, LogPsa)
+Fit5 = lm(LogPsa~PCdata$benpros, data = PCdata)
+abline(Fit5)
+```
+```{r}
+summary(Fit5)
+```
+
+```{r}
+#Relation between LogPsa and PCdata and PCdata$vesinv
+Vesinv = factor(PCdata$vesinv)
+plot(PCdata$vesinv, LogPsa)
+Fit6 = lm(LogPsa~PCdata$vesinv, data = PCdata)
+abline(Fit6)
+```
+```{r}
+summary(Fit6)
+```
+
+```{r}
+#Relation between LogPsa and PCdata and PCdata$capspen
+plot(PCdata$capspen, LogPsa)
+Fit7 = lm(LogPsa~PCdata$capspen, data = PCdata)
+abline(Fit7)
+
+```
+
+```{r}
+summary(Fit7)
+```
+
+```{r}
+#Relation between LogPsa and PCdata and PCdata$gleason
+plot(PCdata$gleason, LogPsa)
+Fit8 = lm(LogPsa~PCdata$gleason, data = PCdata)
+abline(Fit8)
+```
+
+```{r}
+summary(Fit8)
+```
+# One can conclude that carcervol, gleason, vesinv, benepros and capspen are significant and show considerable relationship with PSA level.
+# To predict PSA we use different combinations of above predictors
+```{r}
+Fit9 = lm(LogPsa ~  PCdata$cancervol + factor(PCdata$vesinv) + PCdata$gleason + PCdata$capspen, data = PCdata )
+
+```
+
+```{r}
+summary(Fit9)
+```
+# To  analyze changes in the model by including some of the predictors like PCdata$cancervol, factor(PCdata$vesinv), PCdata$gleason 
+```{r}
+Fit10 = lm(LogPsa ~  PCdata$cancervol + factor(PCdata$vesinv) + PCdata$gleason, data = PCdata )
+```
+
+```{r}
+summary(Fit10)
+```
+```{r}
+anova(Fit10, Fit9)
+```
+# Capsapen is not a significant predictor as pval is >=0.05
+```{r}
+# Using all significant predictors
+FitAll = lm(LogPsa ~  PCdata$cancervol + factor(PCdata$vesinv) + PCdata$gleason + PCdata$benpros, data = PCdata )
+```
+
+```{r}
+summary(FitAll)
+```
+
+
+```{r}
+# Residual Plot
+plot(fitted(FitAll), resid(FitAll))
+abline(h=0)
+```
+
+
+```{r}
+#QQ- Plot
+qqnorm(resid(FitAll))
+qqline(resid(FitAll))
+```
+# Question - Use the final model to predict the PSA level for a patient whose quantitative predictors are at the sample means of the variables and qualitative predictors are at the most frequent category.
+
+# taking mean of quantitative and qualitative predictors
+```{r}
+CancervolMean = mean(PCdata$cancervol)
+CancervolMean
+```
+
+```{r}
+GleasonMean = mean(PCdata$gleason)
+GleasonMean
+```
+
+```{r}
+BenprosMean = mean(PCdata$benpros)
+BenprosMean
+```
+
+```{r}
+MfVesinv = names(which.max(table(factor(PCdata$vesinv))))
+MfVesinv
+```
+
+```{r}
+anova(Fit9, FitAll)
+```
+
+
+```{r}
+anova(FitAll, Fit10)
+```
+
+
+```{r}
+x1 = -0.65013
+x2 = 0.06488
+x3 = 0.68421
+x4 = 0.33376
+x5 = 0.09136
+PredictingAns = exp(x1 + x2 * CancervolMean + x3 * 0 + x4* GleasonMean + x5 * BenprosMean)
+PredictingAns
+```
+
